@@ -1,1 +1,204 @@
-# sagemaker handson
+# SageMaker Sandbox handson
+
+@(Handson)
+
+
+## Step1 CloudFormationによる環境作成
+事前に配布した２つのYAMLファイルのCloudFormation テンプレートを実行します、
+* sandbox-landing.yaml
+* sandbox-sandbox.yaml
+![Alt text](./1565601124147.png)
+
+
+管理コンソールからCloudFormationのサービスを選択
+![Alt text](./1565178561912.png)
+
+
+##### Landingのスタック作成 
+![Alt text](./1565179156581.png)
+1.  「新しいスタックの作成」を選択
+
+![Alt スタックの作成](./1565177361873.png)
+2. 「テンプレートを Amazon S3 にアップロード」のファイル選択で `sandbox-landing.yaml`を指定し、「次へ」
+
+![Alt スタックの名前](./1565177616430.png)
+3. スタックの名前に  ”WS1” を入れて「次へ」 
+
+![Alt text](./1565177868308.png)
+4.   デフォルトのまま「次へ」
+
+![Alt text](./1565177842075.png)
+5. 「AWS CloudFormation によってカスタム名のついた IAM リソースが作成される場合があることを承認します。」のチェックをオンにして、「作成」
+
+![Alt text](./1565179414457.png)
+
+##### Sandboxのスタック作成 
+![Alt text](./1565179602489.png)
+6 「新しいスタックの作成」を選択し、「テンプレートを Amazon S3 にアップロード」のファイル選択で `sandbox-sandbox.yaml`を指定する
+
+![Alt text](./1565179670220.png)
+7.  スタック名を 「WS2」にして同様に作成する
+
+![Alt text](./1565186771844.png)
+8.  スタックが CREATE_COMPLETE になれば完成
+ 
+##### 確認
+* WS1/WS2 の2つのVPCが作成されている
+![Alt text](./1565186827662.png)
+
+
+* WS1/WS2 の４つのサブネットが作成されている
+![Alt text](./1565186850900.png)
+
+* endpointインターフェースが作成されている
+![Alt text](./1565186877300.png)
+
+ 
+* ２つの Notebook インスタンスが作成されている
+![Alt text](./1565186904095.png)
+
+
+
+## Step2 カスタムコンテナ作成
+Amazon SageMaker > ノートブックインスタンス
+* WS1-LandingNotebook インスタンスで　Open Jupyter をクリック
+![Alt text](./1565187027995.png)
+
+*  create_docker.ipynb をオープン
+![Alt text](./1565593540338.png)
+
+* notebookに従って、一行ずつに実行
+Shift + Enter でカーソル行を実行します。
+![Alt text](./1565593338297.png)
+
+* docker push が成功すればOK
+![Alt text](./1565593801485.png)
+
+* Notebookを最後まで実行し、S3に関連ファイルをアップロードする
+![Alt text](./1565594252890.png)
+
+#### 確認
+* ECRにイメージが登録されていることを確かめる
+![Alt text](./1565593888093.png)
+
+ECR > リポジトリ
+![Alt text](./1565594155066.png)
+
+![Alt text](./1565594301510.png)
+
+
+## Step3 Sandbox環境でモデル学習と推論デプロイ
+Amazon SageMaker > ノートブックインスタンス
+WS2-SandboxNotebook インスタンスで　Open Jupyter をクリック
+![Alt text](./1565187009296.png)
+
+### 準備作業
+* Jupyter からTerminalをオープン
+![Alt text](./1565594727046.png)
+
+
+* S3からnotebook関連ファイルをコピー
+Files > New > Terminal 
+Terminal で次のコマンドを実行します
+```
+cd SageMaker
+aws s3 cp --recursive  s3://sagemaker-ap-northeast-1-925889618331/LAB-handson sciket-custom
+```
+
+
+
+###endpoints.jsonを修正
+/home/ec2-user/anaconda3/envs/chainer_p36/lib/python3.6/site-packages/botocore/data/endpoints.json の hostnameにVPC endpointのホスト名を追記していく
+
+* VPC > エンドポイント
+![Alt text](./1565146600050.png)
+
+* エンドポイントの詳細にあるDNS名を１つ選んで、endpoints.jsonの該当サービスのhostnameとして登録していく
+![Alt text](./1565595198316.png)
+
+* 登録するエンドポイント
+ *  sts
+ * logs
+ * notebook
+ * api.sagemaker
+ * runtime.sagemaker
+ *  api.ecr
+
+
+* endpoints.jsonにhostname登録の例
+/home/ec2-user/anaconda3/envs/chainer_p36/lib/python3.6/site-packages/botocore/data/endpoints.json
+エンドポイントのDNS名(vpceで始まる)を　`hostname` として 追加した例です。
+```
+      "sts" : {
+        "defaults" : {
+          "credentialScope" : {
+            "region" : "ap-northeast-1"
+          },
+          "hostname" : "vpce-07a04bf233a7bbccb-yxh1tfbr.sts.ap-northeast-1.vpce.amazonaws.com" 
+        },
+        "endpoints" : {
+          "ap-east-1" : {
+            "credentialScope" : {
+              "region" : "ap-east-1"
+            },
+            "hostname" : "sts.ap-east-1.amazonaws.com"
+          },
+          "ap-northeast-1" : {
+            "credentialScope" : {
+              "region" : "ap-northeast-1"
+            },
+            "hostname" : "vpce-07a04bf233a7bbccb-yxh1tfbr.sts.ap-northeast-1.vpce.amazonaws.com"
+          },
+```
+```
+      "api.sagemaker" : {
+        "endpoints" : {
+          "ap-northeast-1" : {
+            "hostname" : "vpce-0a8e80e89e089bef4-0oxjfya5.api.sagemaker.ap-northeast-1.vpce.amazonaws.com"
+          },
+```
+
+```
+      "logs" : {
+        "endpoints" : {
+          "ap-east-1" : { },
+          "ap-northeast-1" : {
+             "hostname" : "vpce-07b1d8b6b579c9244-9xycdsvm.logs.ap-northeast-1.vpce.amazonaws.com"
+          },          
+```
+
+```
+      "runtime.sagemaker" : {
+        "endpoints" : {
+          "ap-northeast-1" : {
+            "hostname" : "vpce-0b91622fd0b7b989a-xi93pg1w.runtime.sagemaker.ap-northeast-1.vpce.amazonaws.com"
+          }
+        }
+      },
+```
+```
+      "api.ecr" : {
+        "endpoints" : {
+          "ap-east-1" : {
+            "credentialScope" : {
+              "region" : "ap-east-1"
+            },
+            "hostname" : "api.ecr.ap-east-1.amazonaws.com"
+          },
+          "ap-northeast-1" : {
+            "credentialScope" : {
+              "region" : "ap-northeast-1"
+            },
+            "hostname" : "vpce-0a1d76bfb01161444-m5pyrmpt.api.ecr.ap-northeast-1.vpce.amazonaws.com "
+          },
+```
+
+### モデル学習の実行
+* scikit-learn.ipynb を開く
+![Alt text](./1565594836846.png)
+
+* notebookに従って、一行ずつに実行
+Shift + Enter でカーソル行を実行します。
+![Alt text](./1565600796526.png)
+
+
