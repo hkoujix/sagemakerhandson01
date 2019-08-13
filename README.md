@@ -108,7 +108,7 @@ aws s3 cp --recursive  s3://sagemaker-ap-northeast-1-925889618331/LAB-handson sc
 
 
 
-###endpoints.jsonを修正
+### endpoints.jsonを修正
 /home/ec2-user/anaconda3/envs/chainer_p36/lib/python3.6/site-packages/botocore/data/endpoints.json の hostnameにVPC endpointのホスト名を追記していく
 
 * VPC > エンドポイント
