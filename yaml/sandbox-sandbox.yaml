@@ -16,10 +16,6 @@ Parameters:
       - ml.m5.xlarge
       - ml.m5.2xlarge
       - ml.m5.4xlarge
-  SageMakerS3Bucket:
-    Description: <Optional> Name of a pre-existing bucket that SageMaker will be granted full access
-    Type: String
-    Default: ''
 
 Mappings:
   SubnetConfig:

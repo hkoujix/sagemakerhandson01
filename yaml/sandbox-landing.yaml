@@ -20,10 +20,6 @@ Parameters:
       - ml.m5.xlarge
       - ml.m5.2xlarge
       - ml.m5.4xlarge
-  SageMakerS3Bucket:
-    Description: <Optional> Name of a pre-existing bucket that SageMaker will be granted full access
-    Type: String
-    Default: ''
 
 Mappings:
   SubnetConfig:
@@ -474,6 +470,7 @@ Resources:
                     git clone https://git-codecommit.ap-northeast-1.amazonaws.com/v1/repos/khlab-handson
                     chown -R ec2-user.ec2-user /home/ec2-user/.aws 
                     chown -R ec2-user.ec2-user /home/ec2-user/.gitconfig
+                    chown -R ec2-user.ec2-user /home/ec2-user/SageMaker/khkab-handson
 
 Outputs:
   VPCId:
