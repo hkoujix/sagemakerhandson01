@@ -470,7 +470,7 @@ Resources:
                     git clone https://git-codecommit.ap-northeast-1.amazonaws.com/v1/repos/khlab-handson
                     chown -R ec2-user.ec2-user /home/ec2-user/.aws 
                     chown -R ec2-user.ec2-user /home/ec2-user/.gitconfig
-                    chown -R ec2-user.ec2-user /home/ec2-user/SageMaker/khkab-handson
+                    chown -R ec2-user.ec2-user /home/ec2-user/SageMaker
 
 Outputs:
   VPCId:
